@@ -3,6 +3,7 @@
 namespace App\Security;
 
 use App\Entity\User;
+use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -76,6 +77,8 @@ class SecurityControllerAuthenticator extends AbstractFormLoginAuthenticator
 
     public function checkCredentials($credentials, UserInterface $user)
     {
+
+         
         return $this->passwordEncoder->isPasswordValid($user, $credentials['password']);
     }
 

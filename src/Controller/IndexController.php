@@ -12,7 +12,16 @@ class IndexController extends AbstractController
      */
     public function index()
     {
-        return $this->render('index/index.html.twig', [
+        return $this->render('index/index.html.twig.', [
+            'controller_name' => 'IndexController',
+        ]);
+    }
+
+    /**
+     * @Route("/index/peer", name="peerr")
+     */
+    public function peer(){
+        return $this->render('index/per.html.twig', [
             'controller_name' => 'IndexController',
         ]);
     }

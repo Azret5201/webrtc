@@ -12,7 +12,7 @@ class WebController extends AbstractController
      */
     public function index()
     {
-        return $this->render('web/index.html.twig', [
+        return $this->render('web/index.html.twig.', [
             'controller_name' => 'WebController',
         ]);
     }
@@ -22,7 +22,7 @@ class WebController extends AbstractController
      */
     public function video()
     {
-        return $this->render('web/video.html.twig', [
+        return $this->render('web/video.html.twig.', [
             'controller_name' => 'WebController',
         ]);
     }

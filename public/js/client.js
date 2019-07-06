@@ -1,34 +1,26 @@
-var stream;
+var video = document.getElementById(sourcevid);
 
-'use strict';
+navigator.getUserMedia = navigator.getUserMedia ||
+    navigator.webkitGetUserMedia ||
+    navigator.mozGetUserMedia;
 
-// On this codelab, you will be streaming only video (video: true).
-const mediaStreamConstraints = {
-    video: true,
-};
-
-// Video element where stream will be placed.
-const localVideo = document.querySelector('video');
-
-// Local stream that will be reproduced on the video.
-let localStream;
-
-// Handles success by adding the MediaStream to the video element.
-function gotLocalMediaStream(mediaStream) {
-    localStream = mediaStream;
-    localVideo.srcObject = mediaStream;
+if (navigator.getUserMedia) {
+    navigator.getUserMedia({ audio: true, video: true },
+        function(s) {
+        stream = s;
+            var video = document.querySelector('video');
+            video.srcObject = stream;
+            video.onloadedmetadata = function(e) {
+                video.play();
+            };
+        },
+        function(err) {
+            console.log("The following error occurred: " + err.name);
+        }
+    );
+} else {
+    console.log("getUserMedia not supported");
 }
-
-// Handles error by logging a message to the console with the error message.
-function handleLocalMediaStreamError(error) {
-    console.log('navigator.getUserMedia error: ', error);
-}
-
-// Initializes media stream.
-navigator.mediaDevices.getUserMedia(mediaStreamConstraints)
-    .then(gotLocalMediaStream).catch(handleLocalMediaStreamError);
-
-
 btnGetAudioTracks.addEventListener("click", function(){
     console.log("getAudioTracks");
     console.log(stream.getAudioTracks());
