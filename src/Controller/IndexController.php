@@ -25,4 +25,13 @@ class IndexController extends AbstractController
             'controller_name' => 'IndexController',
         ]);
     }
+
+    /**
+     * @Route("index/mes", name="mes")
+     */
+    public function mes(){
+        return $this->render('index/mes.html.twig', [
+            'controller_name' => 'IndexController',
+        ]);
+    }
 }
