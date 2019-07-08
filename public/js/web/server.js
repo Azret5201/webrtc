@@ -1,96 +1,148 @@
 var WebSocketServer = require('ws').Server,
-        connection = new WebSocketServer({ port:8000 });
+    wss = new WebSocketServer({ port: 8000 });
 
-var name = "";
+var users = {};
 
-var loginInput = document.querySelector('#loginInput');
-var loginBtn = document.querySelector('#loginBtn');
-var otherUsernameInput = document.querySelector('#otherUsernameInput');
-var connectToOtherUsernameBtn = document.querySelector('#connectToOtherUsernameBtn');
-var connectedUser, myConnection;
-
-//when a user clicks the login button
-loginBtn.addEventListener("click", function (event) {
-    name = loginInput.value;
-
-    if (name.length > 0)
-    {
-        send({
-            type: "login",
-            name: name
-        });
-    }
-
+wss.on('listening', function () {
+    console.log("Server started...");
 });
 
-//handle message from the server
-connection.onmessage = function (message) {
-    console.log("Got message", message.data);
-    var data = JSON.parse(message.data);
+wss.on('connection', function (connection) {
+    console.log("User connected");
 
-    switch (data.type)
-    {
-        case "login":
-            onLogin(data.success);
-            break;
-        case "offer":
-            onOffer(data.offer, data.name);
-            break;
-        case "answer":
-            onAnswer(data.answer);
-            break;
-        case "candidate":
-            onCandidate(data.candidate);
-            break;
-        default:
-            break;
+    //message function
+    connection.on('message', function (message) {
+        var data;
 
-    }
-};
+        //accepting only JSON messages
+        try {
+            data = JSON.parse(message);
+        }catch (e) {
+            console.log("Invalid JSON");
+            data = {};
+        }
 
-//when a user logs in
-function onLogin(success) {
-    if (success === false) {
-        alert("oops... try a different username");
-    }
-    else {
-        //creating our RTCPeerConnection
-        var configuration = {
-            "iceServers": [{"url": "stun.1.google.com.19302"}]
-        };
+        //switching type of the user message
+        switch (data.type){
+            //when a user tries tp login
+            case 'login':
+                console.log("User logged:", data.name);
 
-        myConnection = new webkitRTCPeerConnection(configuration);
-        console.log("RTCPeerConnection object was created");
-        console.log(myConnection);
+                //if anyone is logged in with this username then refuse
+                if(users[data.name])
+                {
+                    sendTo(connection, {
+                        type: "login",
+                        success: false
+                    });
+                }
+                else{
+                    //save user connection on the server
+                    users[data.name] = connection;
+                    connection.name = data.name;
 
-        //setup ice handling
-        //when the browser finds an ice candidate we send it to another peer
-        myConnection.onicecandidate = function (event) {
+                    sendTo(connection,{
+                        type: "login",
+                        success: true
+                    });
+                }
+                break;
 
-            if (event.candidate) {
-                send({
-                    type: "candidate",
-                    candidate: event.candidate
+            case "offer":
+                //for ex. userA wnats to call UserB
+                console.log("Sending offer to: ", data.name);
+
+                //if userB exists then send him offer details
+                var conn = users[data.name];
+
+                if(conn != null)
+                {
+                    //setting that UserA connected with UserB
+                    connection.otherName = data.name;
+
+                    sendTo(conn, {
+                        type: "offer",
+                        offer: data.offer,
+                        name: connection.name
+
+                    });
+                }
+                break;
+
+
+            case "answer":
+                console.log("Sending answer to: ", data.name);
+
+                //for ex. UserB answers UserA
+                var conn = users[data.name];
+
+                if(conn != null)
+                {
+                    connection.otherName = data.name;
+                    sendTo(conn, {
+                        type: "answer",
+                        answer: data.answer
+                    });
+                }
+                break;
+
+            case "candidate":
+                console.log("Sending candidate to: ", data.name);
+                var conn = users[data.name];
+
+                if(conn != null)
+                {
+                    sendTo(conn, {
+                        type: "candidate",
+                        candidate: data.candidate
+                    });
+                }
+                break;
+
+            case 'leave':
+                console.log("Disconnecting from", data.name);
+                var conn = users[data.name];
+                conn.otherName = null;
+
+                //notify the other user so he can disconnect his peer connection
+                if(conn != null)
+                {
+                    sendTo(conn, {
+                        type: "leave",
+                    });
+                }
+                break;
+
+            default:
+                sendTo(connection, {
+                    type: "error",
+                    message: "Command no found: " + data.type
                 });
+                break;
+        }
+    });
+
+
+    //close the connection
+    connection.on('close', function () {
+        if(connection.name)
+        {
+            delete users[connection.name];
+            if (connection.otherName){
+                console.log("Disconnecting from ", connection.otherName);
+                var conn = users[connection.otherName];
+                conn.otherName = null;
+
+                if (conn != null){
+                    sendTo(conn, {
+                        type: "leave"
+                    });
+                }
             }
-        };
-    }
-};
-
-connection.onopen = function () {
-    console.log("Connected");
-};
-
-connection.onerror = function (err) {
-    console.log("Got error",err);
-}
-
-//Alias for sending messages in JSON format
-function send(message) {
-    if(connectedUser)
-    {
-        message.name = connectedUser;
-    }
-
+        }
+    });
+connection.send("Hello world");
+});
+function sendTo(connection, message) {
     connection.send(JSON.stringify(message));
 }

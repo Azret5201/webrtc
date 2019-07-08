@@ -1,26 +1,55 @@
 <!DOCTYPE html>
-<html lang = "en">
+<html>
 
 <head>
-    <meta charset = "utf-8" />
+
+    <title>Realtime communication with WebRTC</title>
+
+    <link rel="stylesheet" href="css/peer/main.css" />
+
 </head>
 
 <body>
-<video id="sourcevid" autoplay></video>
 
-<div><button id = "btnGetAudioTracks">getAudioTracks()
-    </button></div>
-<div><button id = "btnGetTrackById">getTrackById()
-    </button></div>
-<div><button id = "btnGetTracks">getTracks()</button></div>
-<div><button id = "btnGetVideoTracks">getVideoTracks()
-    </button></div>
-<div><button id = "btnRemoveAudioTrack">removeTrack() - audio
-    </button></div>
-<div><button id = "btnRemoveVideoTrack">removeTrack() - video
-    </button></div>
+<h1>Realtime communication with WebRTC</h1>
 
-<script src = "js/client.js"></script>
+<video id="localVideo" autoplay playsinline></video>
+<video id="remoteVideo" autoplay playsinline></video>
+
+<div>
+    <button id="startButton">Start</button>
+    <button id="callButton">Call</button>
+    <button id="hangupButton">Hang up</button>
+</div>
+
+
+<script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+<script src="js/peer/main.js"></script>
+
 </body>
 
 </html>
+
+{#<!DOCTYPE html>#}
+{#<html lang = "en">#}
+
+{#<head>#}
+    {#<meta charset = "utf-8" />#}
+{#</head>#}
+
+{#<body>#}
+{#<video id="sourcevid" autoplay style="width: 240px; height: 240px; margin: 5px; background: black"></video>#}
+{#<video id="" autoplay style="width: 240px; height: 240px; margin: 5px; background: black"></video>#}
+{#<button id="createOffer">Offer</button>#}
+{#<button id="createAnswer">Answer</button>#}
+{#<br />#}
+{#<textarea name="" id="text" cols="30" rows="10"></textarea>#}
+{#<br />#}
+{#<button id="setRemoteDescription">Set Remote Desc</button>#}
+{#<button id="addCandidate">Add Candidate</button>#}
+
+
+{#<script src = "js/client.js"></script>#}
+{#</body>#}
+
+{#</html>#}
