@@ -34,4 +34,13 @@ class IndexController extends AbstractController
             'controller_name' => 'IndexController',
         ]);
     }
+
+    /**
+     * @Route("index/camera", name="camera")
+     */
+    public function camera(){
+        return $this->render('index/camera.html.twig', [
+            'controller_name' => 'IndexController',
+        ]);
+    }
 }

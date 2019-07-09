@@ -9,7 +9,7 @@ conn.onopen = function () {
     console.log("Connected to the signaling server");
 };
 
-//when we got a message from a signaling server
+// when we got a message from a signaling server
 conn.onmessage = function (msg) {
         console.log("Got message:", msg.data);
 
@@ -17,6 +17,7 @@ conn.onmessage = function (msg) {
 
         switch (data.type) {
             case "login":
+
                 handleLogin(data.success);
                 break;
 
@@ -62,12 +63,14 @@ var loginBtn = document.querySelector('#loginBtn');
 
 var callPage = document.querySelector('#callPage');
 var callToUsernameInput = document.querySelector('#callToUsernameInput');
-var callBtn = document.querySelector('#hangUpBtn');
+var callBtn = document.querySelector('#callBtn');
 
 var hangUpBtn = document.querySelector('#hangUpBtn');
 
 var localVideo = document.querySelector('#localVideo');
 var remoteVideo = document.querySelector('#remoteVideo');
+
+const mediaStreamConstraints = {video: true, audio: true};
 
 var yourConn;
 var stream;
@@ -87,56 +90,101 @@ loginBtn.addEventListener("click", function (event) {
         });
     }
 });
+
+// function handleLogin(success) {
+//     if (success === false) {
+//         alert("Ooops... try a different username");
+//         // console.log('azret');
+//     }else {
+//         //display the call page if login is successful
+//         loginPage.style.display = "none";
+//         callPage.style.display = "block";
+//
+//         // start peer connection
+//         //**********
+//         // Starting a peer connection
+//         //**********
+//        // getting local video stream
+//         //     navigator.mediaDevices.getUserMedia({video: true, audio: true}).then(function(mediaStream){
+//         //         stream = mediaStream;
+//         //         localVideo.srcObject = stream;
+//         //
+//         //         localVideo.onloadedmetadata = function(e){
+//         //             localVideo.play();
+//         //         };
+//
+//         function gotLocalMediaStream(mediaStream) {
+//             stream = mediaStream;
+//             localVideo.srcObject = stream;
+//         }
+//
+//         function handleLocalMediaStreamError(error) {
+//             console.log('navigator.hetUserMedia error: ', error);
+//         }
+//         navigator.mediaDevices.getUserMedia(mediaStreamConstraints)
+//             .then(gotLocalMediaStream).catch(handleLocalMediaStreamError);
+//         console.log('asd');
+//         //using google public stun server
+//         var configuration = {
+//             "iceServers": [{"url":"stun:stun2.1.google.com:19302"}]
+//         };
+//
+//         yourConn = new webkitRTCPeerConnection(configuration);
+//         //setup stream listening
+//         yourConn.addStream(stream);
+//
+//         //when a remote user adds stream to the peer connection, we display it
+//         yourConn.onaddstream = function (e) {
+//             remoteVideo.src = window.URL.createObjectURL(e.stream);
+//         };
+//
+//         //setup ice handing
+//         yourConn.onicecandidate = function (event) {
+//             if (event.candidate) {
+//                 send({
+//                     type: "candidate",
+//                     candidate: event.candidate
+//                 });
+//             }
+//         };
+//     }
+// }
+
 function handleLogin(success) {
     if (success === false) {
-        alert("Ooooops... try a different username");
-    }else {
-        //display the call page if login is successful
+        alert("Ooops...try a different username");
+    } else {
         loginPage.style.display = "none";
         callPage.style.display = "block";
-        // start peer connection
-        //**********
-        // Starting a peer connection
-        //**********
 
+        //**********************
+        //Starting a peer connection
+        //**********************
 
-        // getting local video stream
-
-
-        navigator.webkitGetUserMedia({video: true, audio: true}, function (myStream) {
+        //getting local video stream
+        navigator.webkitGetUserMedia({ video: true, audio: true }, function (myStream) {
             stream = myStream;
 
-            //display local video stream on the page
+            //displaying local video stream on the page
             // localVideo.src = window.URL.createObjectURL(stream);
             localVideo.srcObject = stream;
 
-
-            //
-            // navigator.mediaDevices.getUserMedia(constraints).then(function(mediaStream){
-            //     localVideo.srcObject = mediaStream;
-            //
-            //     localVideo.onloadedmetadata = function(e){
-            //         localVideo.play();
-            //     };
-            // })
-            //     .catch(function(err) { console.log(err.name + ": " + err.message);});
-
-            //using google public stun server
+            //using Google public stun server
             var configuration = {
-                "iceServers": [{"url":"stun:stun2.1.google.com:19302"}]
+                "iceServers": [{ "url": "stun:stun2.1.google.com:19302" }]
             };
+
             yourConn = new webkitRTCPeerConnection(configuration);
 
-            //setup stream listening
+            // setup stream listening
             yourConn.addStream(stream);
-
 
             //when a remote user adds stream to the peer connection, we display it
             yourConn.onaddstream = function (e) {
                 remoteVideo.src = window.URL.createObjectURL(e.stream);
             };
 
-            //setup ice handing
+            // Setup ice handling
             yourConn.onicecandidate = function (event) {
                 if (event.candidate) {
                     send({
@@ -145,17 +193,18 @@ function handleLogin(success) {
                     });
                 }
             };
+
         }, function (error) {
-            console.log(error)
+            console.log(error);
         });
+
     }
 };
-
 callBtn.addEventListener("click", function () {
     var callToUsername = callToUsernameInput.value;
     if (callToUsername.length > 0) {
         connectedUser = callToUsername;
-
+        console.log('asdasdasd');
         //create offer
         yourConn.createOffer(function (offer) {
             send({

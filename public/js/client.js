@@ -27,6 +27,7 @@ connection.onmessage = function (message) {
 
     switch(data.type) {
         case "login":
+            console.log('lsdfglhlkj');
             onLogin(data.success);
             break;
         case "offer":
