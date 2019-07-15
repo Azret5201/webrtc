@@ -14,6 +14,8 @@ use Sonata\AdminBundle\Datagrid\DatagridMapper;
 use Sonata\AdminBundle\Datagrid\ListMapper;
 use Sonata\AdminBundle\Form\FormMapper;
 use Sonata\AdminBundle\Form\Type\CollectionType;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class UserAdmin extends AbstractAdmin
@@ -34,7 +36,11 @@ class UserAdmin extends AbstractAdmin
                 'allow_add' => true,
                 'allow_delete' => true,
             ))
-            ->add('password', TextType::class)
+            ->add('password', RepeatedType::class, array(
+                'type' => PasswordType::class,
+                'first_options' => array('label' => 'Password'),
+                'second_options' => array('label' => 'Password confirmation')
+            ))
             ;
     }
 
@@ -54,5 +60,15 @@ class UserAdmin extends AbstractAdmin
             ->addIdentifier('roles')
             ->addIdentifier('password')
             ;
+    }
+
+    public function prePersist($object)
+    {
+        $password = $object->getPassword();
+        $container = $this->getConfigurationPool()->getContainer();
+        $encoder = $container->get('security.password_encoder');
+        $encoded = $encoder->encodePassword($object, $password);
+
+        $object->setPassword($encoded);
     }
 }
